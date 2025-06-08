@@ -1,0 +1,1483 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PeteZah Search</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: #fff;
+            color: #202124;
+            min-height: 100vh;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: #fff;
+            box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 1000;
+        }
+
+        .logo img {
+            height: 32px;
+        }
+
+        .search-container {
+            flex-grow: 1;
+            margin-left: 1rem;
+            max-width: calc(100% - 100px);
+        }
+
+        .search-wrapper {
+            position: relative;
+            background: #fff;
+            border: 1px solid #dfe1e5;
+            border-radius: 24px;
+            padding: 0.8rem 1.5rem;
+            box-shadow: 0 1px 6px rgba(32, 33, 36, 0.28);
+            transition: box-shadow 0.2s ease;
+        }
+
+        .search-wrapper:hover, .search-wrapper:focus-within {
+            box-shadow: 0 3px 12px rgba(32, 33, 36, 0.2);
+            border-color: #005b99;
+        }
+
+        .search-input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #202124;
+            font-size: 1rem;
+            font-weight: 400;
+            padding-right: 100px;
+        }
+
+        .search-input::placeholder {
+            color: #5f6368;
+        }
+
+        .search-actions {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .search-btn {
+            background: #005b99;
+            border: none;
+            border-radius: 20px;
+            padding: 0.5rem 1rem;
+            color: #fff;
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .search-btn:hover {
+            background: #003087;
+        }
+
+        .action-btn {
+            width: 30px;
+            height: 30px;
+            background: #f8f9fa;
+            border: 1px solid #dfe1e5;
+            border-radius: 50%;
+            color: #005b99;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .action-btn:hover {
+            background: #e8eaed;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 1.2rem;
+            margin: 1rem 0;
+            padding: 0 2rem;
+            border-bottom: 1px solid #e8eaed;
+        }
+
+        .tab {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #5f6368;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab.active {
+            border-bottom: 2px solid #005b99;
+            color: #202124;
+        }
+
+        .tab:hover {
+            color: #202124;
+        }
+
+        .suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #fff;
+            border: 1px solid #dfe1e5;
+            border-radius: 8px;
+            margin-top: 0.2rem;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .suggestion-item {
+            padding: 0.6rem 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .suggestion-item:hover {
+            background: #f1f3f4;
+        }
+
+        .suggestion-icon {
+            color: #005b99;
+            font-size: 1rem;
+        }
+
+        .suggestion-text {
+            font-weight: 400;
+            color: #202124;
+        }
+
+        .results-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: none;
+        }
+
+        .results-header {
+            margin-bottom: 1rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid #e8eaed;
+        }
+
+        .results-stats {
+            display: flex;
+            justify-content: space-between;
+            color: #5f6368;
+            font-size: 0.85rem;
+        }
+
+        .results-count {
+            color: #202124;
+            font-weight: 500;
+        }
+
+        .search-time {
+            color: #005b99;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 2rem;
+        }
+
+        .results-main {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .result-item {
+            background: #fff;
+            border: 1px solid #dfe1e5;
+            border-radius: 8px;
+            padding: 1.2rem;
+            cursor: pointer;
+            transition: box-shadow 0.2s ease;
+        }
+
+        .result-item:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-bottom: 0.6rem;
+        }
+
+        .result-favicon {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
+
+        .result-source {
+            color: #5f6368;
+            font-size: 0.75rem;
+            background: #f1f3f4;
+            padding: 0.2rem 0.5rem;
+            border-radius: 6px;
+            margin-left: auto;
+        }
+
+        .result-title {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #1a0dab;
+            margin-bottom: 0.4rem;
+        }
+
+        .result-item:hover .result-title {
+            color: #003087;
+        }
+
+        .result-url {
+            color: #006621;
+            font-size: 0.8rem;
+            margin-bottom: 0.4rem;
+            word-break: break-all;
+        }
+
+        .result-description {
+            color: #4d5156;
+            line-height: 1.4;
+            font-size: 0.85rem;
+        }
+
+        .result-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 6px;
+            margin-top: 0.4rem;
+        }
+
+        .result-video {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            border-radius: 6px;
+            margin-top: 0.4rem;
+        }
+
+        .result-video iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .result-shopping {
+            display: flex;
+            gap: 0.8rem;
+            align-items: center;
+            margin-top: 0.4rem;
+        }
+
+        .result-shopping img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
+        .result-news {
+            border-left: 2px solid #005b99;
+            padding-left: 0.8rem;
+            margin-top: 0.4rem;
+        }
+
+        .result-forum {
+            background: #f8f9fa;
+            padding: 0.8rem;
+            border-radius: 6px;
+            margin-top: 0.4rem;
+        }
+
+        .domain-result {
+            border: 1px solid #005b99;
+        }
+
+        .domain-result .result-title {
+            color: #005b99;
+            font-size: 1.2rem;
+        }
+
+        .domain-result .result-url {
+            color: #006621;
+        }
+
+        .domain-badge {
+            background: #005b99;
+            color: #fff;
+            padding: 0.2rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            margin-left: auto;
+        }
+
+        .sidebar {
+            background: #fff;
+            border: 1px solid #dfe1e5;
+            border-radius: 8px;
+            padding: 1.2rem;
+            height: fit-content;
+            position: sticky;
+            top: 1rem;
+            margin-right: 1rem;
+            box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+        }
+
+        .sidebar:hover {
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .sidebar-title {
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 0.8rem;
+            color: #005b99;
+        }
+
+        .sidebar-content {
+            color: #4d5156;
+            line-height: 1.4;
+        }
+
+        .quick-info {
+            background: #f8f9fa;
+            padding: 0.8rem;
+            border-radius: 6px;
+            border-left: 2px solid #005b99;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #5f6368;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 2px solid #e8eaed;
+            border-top: 2px solid #005b99;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 0.8rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 0.9rem;
+            font-weight: 400;
+        }
+
+        .load-more-btn {
+            width: 100%;
+            padding: 0.8rem;
+            background: #f8f9fa;
+            border: 1px solid #dfe1e5;
+            border-radius: 8px;
+            color: #005b99;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.85rem;
+        }
+
+        .load-more-btn:hover {
+            background: #e8eaed;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 2rem;
+            color: #5f6368;
+        }
+
+        .no-results h3 {
+            color: #202124;
+            font-size: 1.2rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .error-message {
+            text-align: center;
+            padding: 1.5rem;
+            color: #d93025;
+            background: #fce8e6;
+            border: 1px solid #d93025;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 1024px) {
+            .results-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .sidebar {
+                order: -1;
+                margin-right: 0;
+            }
+
+            .search-container {
+                max-width: calc(100% - 80px);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 0.8rem 1rem;
+                flex-wrap: nowrap;
+            }
+
+            .logo img {
+                height: 28px;
+            }
+
+            .search-container {
+                margin-left: 0.5rem;
+                max-width: calc(100% - 60px);
+            }
+
+            .search-wrapper {
+                padding: 0.6rem 1rem;
+            }
+
+            .search-input {
+                font-size: 0.9rem;
+                padding-right: 80px;
+            }
+
+            .results-container {
+                padding: 0.5rem 1rem;
+            }
+
+            .result-item {
+                padding: 1rem;
+            }
+
+            .result-title {
+                font-size: 1rem;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f3f4;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #005b99;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #003087;
+        }
+    </style>
+</head>
+<body>
+    <script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+    </script>
+    <header class="header">
+        <div class="logo">
+            <img src="https://petezahgames.com/storage/images/logo-png-removebg-preview.png" alt="PeteZah Search Logo">
+        </div>
+        <div class="search-container">
+            <div class="search-wrapper">
+                <input type="text" class="search-input" placeholder="Search PeteZah..." id="searchInput" autocomplete="off">
+                <div class="search-actions">
+                    <button class="action-btn" title="Voice search" onclick="startVoiceSearch()">
+                        <ion-icon name="mic-outline"></ion-icon>
+                    </button>
+                    <button class="search-btn" onclick="performSearch()">Search</button>
+                </div>
+            </div>
+            <div class="suggestions" id="suggestions"></div>
+        </div>
+    </header>
+
+    <div class="tabs">
+        <div class="tab active" data-type="all" onclick="switchTab('all')">All</div>
+        <div class="tab" data-type="images" onclick="switchTab('images')">Images</div>
+        <div class="tab" data-type="videos" onclick="switchTab('videos')">Videos</div>
+        <div class="tab" data-type="shopping" onclick="switchTab('shopping')">Shopping</div>
+        <div class="tab" data-type="news" onclick="switchTab('news')">News</div>
+        <div class="tab" data-type="forum" onclick="switchTab('forum')">Forums</div>
+    </div>
+
+    <div class="results-container" id="resultsContainer">
+        <div class="results-header" id="resultsHeader">
+            <div class="results-stats">
+                <span class="results-count" id="resultsCount"></span>
+                <span class="search-time" id="searchTime"></span>
+            </div>
+        </div>
+        <div class="results-grid">
+            <div class="results-main" id="resultsContent"></div>
+            <div class="sidebar" id="sidebar" onclick="openSidebarLink()">
+                <div class="sidebar-title">Quick Info</div>
+                <div class="sidebar-content" id="sidebarContent">
+                    <div style="color: #5f6368; text-align: center; padding: 1rem;">
+                        Search for something to see quick information and insights
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentQuery = '';
+        let isLoading = false;
+        let searchStartTime = 0;
+        let searchTimeout = null;
+        let allResults = [];
+        let currentPage = 0;
+        let isLoadingMore = false;
+        let currentTab = 'all';
+        const RESULTS_PER_PAGE = 50;
+        const API_KEY = '7NZUY6FCX5CTDC6Y9MXED4ZQ7';
+        let sidebarLink = '';
+
+        const domainMappings = {
+            'petezahgames': 'petezahgames.com',
+            'tiktok': 'tiktok.com',
+            'youtube': 'youtube.com',
+            'google': 'google.com',
+            'facebook': 'facebook.com',
+            'instagram': 'instagram.com',
+            'twitter': 'twitter.com',
+            'x': 'x.com',
+            'reddit': 'reddit.com',
+            'github': 'github.com',
+            'stackoverflow': 'stackoverflow.com',
+            'amazon': 'amazon.com',
+            'netflix': 'netflix.com',
+            'spotify': 'spotify.com',
+            'apple': 'apple.com',
+            'microsoft': 'microsoft.com',
+            'linkedin': 'linkedin.com',
+            'discord': 'discord.com',
+            'twitch': 'twitch.tv',
+            'pinterest': 'pinterest.com',
+            'snapchat': 'snapchat.com',
+            'whatsapp': 'whatsapp.com',
+            'telegram': 'telegram.org',
+            'wikipedia': 'wikipedia.org',
+            'yahoo': 'yahoo.com',
+            'bing': 'bing.com',
+            'duckduckgo': 'duckduckgo.com',
+            'ebay': 'ebay.com',
+            'paypal': 'paypal.com',
+            'dropbox': 'dropbox.com',
+            'zoom': 'zoom.us',
+            'slack': 'slack.com',
+            'notion': 'notion.so',
+            'figma': 'figma.com',
+            'canva': 'canva.com',
+            'adobe': 'adobe.com',
+            'nvidia': 'nvidia.com',
+            'amd': 'amd.com',
+            'intel': 'intel.com',
+            'steam': 'steampowered.com',
+            'epic': 'epicgames.com',
+            'roblox': 'roblox.com',
+            'minecraft': 'minecraft.net',
+            'fortnite': 'fortnite.com',
+            'valorant': 'playvalorant.com',
+            'league': 'leagueoflegends.com',
+            'overwatch': 'playoverwatch.com',
+            'cod': 'callofduty.com',
+            'fifa': 'ea.com/fifa',
+            'nba': 'nba.com',
+            'nfl': 'nfl.com',
+            'espn': 'espn.com',
+            'cnn': 'cnn.com',
+            'bbc': 'bbc.com',
+            'nytimes': 'nytimes.com',
+            'washingtonpost': 'washingtonpost.com',
+            'reuters': 'reuters.com',
+            'bloomberg': 'bloomberg.com',
+            'techcrunch': 'techcrunch.com',
+            'verge': 'theverge.com',
+            'wired': 'wired.com',
+            'ars': 'arstechnica.com'
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            const suggestions = document.getElementById('suggestions');
+
+            searchInput.addEventListener('input', function(e) {
+                const query = e.target.value.trim();
+
+                if (searchTimeout) {
+                    clearTimeout(searchTimeout);
+                }
+
+                if (query.length === 0) {
+                    hideSuggestions();
+                    hideResults();
+                    return;
+                }
+
+                fetchSuggestions(query);
+
+                searchTimeout = setTimeout(() => {
+                    if (query.length >= 2) {
+                        performAutoSearch(query);
+                    }
+                }, 300);
+            });
+
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    performSearch();
+                }
+            });
+
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.search-container')) {
+                    hideSuggestions();
+                }
+            });
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const query = urlParams.get('q');
+            if (query) {
+                searchInput.value = query;
+                performSearch();
+            }
+        });
+
+        async function fetchSuggestions(query) {
+            const suggestions = document.getElementById('suggestions');
+            try {
+                const response = await fetch(`https://en.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(query)}&limit=10&namespace=0&format=json&origin=*`);
+                const data = await response.json();
+                const suggestionsList = data[1].map((text, index) => ({
+                    text,
+                    icon: 'search-outline',
+                    description: data[2][index] || ''
+                }));
+
+                if (suggestionsList.length === 0) {
+                    hideSuggestions();
+                    return;
+                }
+
+                suggestions.innerHTML = suggestionsList.map(suggestion => `
+                    <div class="suggestion-item" onclick="selectSuggestion('${suggestion.text}')">
+                        <ion-icon name="${suggestion.icon}" class="suggestion-icon"></ion-icon>
+                        <span class="suggestion-text">${suggestion.text}</span>
+                    </div>
+                `).join('');
+                suggestions.style.display = 'block';
+            } catch (error) {
+                hideSuggestions();
+            }
+        }
+
+        function hideSuggestions() {
+            document.getElementById('suggestions').style.display = 'none';
+        }
+
+        function selectSuggestion(suggestion) {
+            document.getElementById('searchInput').value = suggestion;
+            hideSuggestions();
+            performSearch();
+        }
+
+        function hideResults() {
+            document.getElementById('resultsContainer').style.display = 'none';
+        }
+
+        async function performAutoSearch(query) {
+            if (query === currentQuery || isLoading) return;
+            await performSearchInternal(query, true);
+        }
+
+        async function performSearch() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query) return;
+            await performSearchInternal(query, false);
+        }
+
+        async function performSearchInternal(query, isAutoSearch = false) {
+            currentQuery = query;
+            currentPage = 0;
+            allResults = [];
+            searchStartTime = Date.now();
+            isLoading = true;
+
+            const newUrl = new URL(window.location);
+            newUrl.searchParams.set('q', query);
+            window.history.pushState({}, '', newUrl);
+
+            const resultsContainer = document.getElementById('resultsContainer');
+            const resultsContent = document.getElementById('resultsContent');
+
+            resultsContainer.style.display = 'block';
+            hideSuggestions();
+
+            if (!isAutoSearch) {
+                resultsContent.innerHTML = `
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <div class="loading-text">Searching...</div>
+                    </div>
+                `;
+            }
+
+            try {
+                const results = await searchDeepWeb(query);
+                displayResults(results, query);
+            } catch (error) {
+                displayError("Failed to fetch search results. Please try again.");
+            }
+
+            isLoading = false;
+        }
+
+        async function searchDeepWeb(query) {
+            const results = [];
+            const searchPromises = [];
+
+            const domainResult = checkDirectDomain(query);
+            if (domainResult) results.push(domainResult);
+
+            if (isWeatherQuery(query)) {
+                const weatherData = await getWeatherData(query);
+                if (weatherData) results.push(weatherData);
+            }
+
+            if (currentTab === 'all' || currentTab === 'web') {
+                searchPromises.push(searchBing(query, 'web'));
+                searchPromises.push(searchWikipedia(query));
+            }
+            if (currentTab === 'all' || currentTab === 'images') {
+                searchPromises.push(searchBingImages(query));
+            }
+            if (currentTab === 'all' || currentTab === 'videos') {
+                searchPromises.push(searchYouTube(query));
+            }
+            if (currentTab === 'all' || currentTab === 'shopping') {
+                searchPromises.push(searchGoogleShopping(query));
+            }
+            if (currentTab === 'all' || currentTab === 'news') {
+                searchPromises.push(searchGoogleNews(query));
+            }
+            if (currentTab === 'all' || currentTab === 'forum') {
+                searchPromises.push(searchReddit(query));
+                searchPromises.push(searchHackerNews(query));
+            }
+
+            const searchResults = await Promise.allSettled(searchPromises);
+            searchResults.forEach(result => {
+                if (result.status === 'fulfilled' && result.value) {
+                    results.push(...result.value);
+                }
+            });
+
+            return removeDuplicatesAndSort(results, query);
+        }
+
+        function checkDirectDomain(query) {
+            const queryLower = query.toLowerCase().trim();
+
+            if (queryLower === 'petezah') return null;
+
+            if (domainMappings[queryLower]) {
+                const domain = domainMappings[queryLower];
+                return {
+                    type: 'domain',
+                    title: `${domain} - Official Website`,
+                    url: `https://${domain}`,
+                    description: `Visit the official ${domain} website.`,
+                    content: `Official homepage for ${domain}`,
+                    domain: domain,
+                    source: 'Direct Domain',
+                    isDomain: true
+                };
+            }
+
+            for (const [key, domain] of Object.entries(domainMappings)) {
+                if (queryLower.includes(key) && queryLower.split(' ').length <= 3) {
+                    return {
+                        type: 'domain',
+                        title: `${domain} - Official Website`,
+                        url: `https://${domain}`,
+                        description: `Visit the official ${domain} website.`,
+                        content: `Official homepage for ${domain}`,
+                        domain: domain,
+                        source: 'Direct Domain',
+                        isDomain: true
+                    };
+                }
+            }
+
+            if (queryLower.includes('.com') || queryLower.includes('.org') || queryLower.includes('.net') || queryLower.includes('.io')) {
+                let cleanDomain = queryLower.replace(/https?:\/\//, '').replace(/www\./, '').split('/')[0];
+                if (cleanDomain === 'petezah.com') return null;
+                return {
+                    type: 'domain',
+                    title: `${cleanDomain} - Website`,
+                    url: `https://${cleanDomain}`,
+                    description: `Visit ${cleanDomain} directly.`,
+                    content: `Direct access to ${cleanDomain}`,
+                    domain: cleanDomain,
+                    source: 'Direct Domain',
+                    isDomain: true
+                };
+            }
+
+            return null;
+        }
+
+        function isWeatherQuery(query) {
+            const weatherKeywords = ['weather', 'temperature', 'forecast', 'climate'];
+            return weatherKeywords.some(keyword => query.toLowerCase().includes(keyword));
+        }
+
+        async function getWeatherData(query) {
+            try {
+                let location = query.replace(/weather|temperature|forecast|climate/gi, '').trim();
+                if (!location) location = 'New York';
+
+                const response = await fetch(`https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${encodeURIComponent(location)}?key=${API_KEY}&include=current`);
+                const data = await response.json();
+
+                const current = data.currentConditions;
+
+                return {
+                    type: 'weather',
+                    title: `Weather in ${data.resolvedAddress}`,
+                    url: '#',
+                    description: `Current weather conditions for ${data.resolvedAddress}`,
+                    content: '',
+                    domain: 'petezahgames.com',
+                    source: 'Weather API',
+                    weatherData: {
+                        location: data.resolvedAddress,
+                        temperature: Math.round((current.temp - 32) * 5/9),
+                        condition: current.conditions,
+                        humidity: current.humidity,
+                        windSpeed: current.windspeed,
+                        visibility: current.visibility,
+                        uvIndex: current.uvindex
+                    }
+                };
+            } catch (error) {
+                return null;
+            }
+        }
+
+        async function searchBing(query, type) {
+            try {
+                const response = await fetch(`https://api.bing.microsoft.com/v7.0/search?q=${encodeURIComponent(query)}`, {
+                    headers: {
+                        'Ocp-Apim-Subscription-Key': 'YOUR_BING_API_KEY'
+                    }
+                });
+                const data = await response.json();
+
+                return (data.webPages?.value || []).map(item => ({
+                    type: 'web',
+                    title: truncateText(item.name, 60),
+                    url: item.url,
+                    description: truncateText(item.snippet, 150),
+                    content: truncateText(item.snippet, 300),
+                    domain: extractDomain(item.url),
+                    source: 'Bing'
+                }));
+            } catch (error) {
+                return [];
+            }
+        }
+
+        async function searchBingImages(query) {
+            try {
+                const response = await fetch(`https://api.bing.microsoft.com/v7.0/images/search?q=${encodeURIComponent(query)}`, {
+                    headers: {
+                        'Ocp-Apim-Subscription-Key': 'YOUR_BING_API_KEY'
+                    }
+                });
+                const data = await response.json();
+
+                return (data.value || []).map(item => ({
+                    type: 'image',
+                    title: truncateText(item.name || query, 60),
+                    url: item.hostPageUrl,
+                    description: truncateText(item.contentUrl || 'Image result', 150),
+                    content: '',
+                    domain: extractDomain(item.hostPageUrl),
+                    source: 'Bing Images',
+                    imageUrl: item.thumbnailUrl
+                }));
+            } catch (error) {
+                return [];
+            }
+        }
+
+        async function searchYouTube(query) {
+            try {
+                const response = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&maxResults=50&key=YOUR_YOUTUBE_API_KEY`);
+                const data = await response.json();
+
+                return (data.items || []).map(video => ({
+                    type: 'video',
+                    title: truncateText(video.snippet.title, 60),
+                    url: `https://www.youtube.com/watch?v=${video.id.videoId}`,
+                    description: truncateText(video.snippet.description, 150),
+                    content: '',
+                    domain: 'youtube.com',
+                    source: 'YouTube',
+                    videoId: video.id.videoId
+                }));
+            } catch (error) {
+                return [];
+            }
+        }
+
+        async function searchGoogleShopping(query) {
+            try {
+                const response = await fetch(`https://serpapi.com/search.json?engine=google_shopping&q=${encodeURIComponent(query)}&api_key=YOUR_SERPAPI_KEY`);
+                const data = await response.json();
+
+                return (data.shopping_results || []).map(item => ({
+                    type: 'shopping',
+                    title: truncateText(item.title, 60),
+                    url: item.link,
+                    description: truncateText(item.price || 'Available for purchase', 150),
+                    content: '',
+                    domain: extractDomain(item.link),
+                    source: item.source || 'Google Shopping',
+                    imageUrl: item.thumbnail
+                }));
+            } catch (error) {
+                return [];
+            }
+        }
+
+        async function searchGoogleNews(query) {
+            try {
+                const response = await fetch(`https://serpapi.com/search.json?engine=google_news&q=${encodeURIComponent(query)}&api_key=YOUR_SERPAPI_KEY`);
+                const data = await response.json();
+
+                return (data.news_results || []).map(item => ({
+                    type: 'news',
+                    title: truncateText(item.title, 60),
+                    url: item.link,
+                    description: truncateText(item.snippet || 'News article', 150),
+                    content: truncateText(item.snippet || '', 300),
+                    domain: extractDomain(item.link),
+                    source: item.source || 'Google News'
+                }));
+            } catch (error) {
+                return [];
+            }
+        }
+
+        async function searchWikipedia(query) {
+            try {
+                const response = await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json&origin=*&srlimit=50`);
+                const data = await response.json();
+
+                const results = [];
+
+                for (const item of data.query.search) {
+                    try {
+                        const contentResponse = await fetch(`https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&prop=extracts&exintro=true&explaintext=true&titles=${encodeURIComponent(item.title)}`);
+                        const contentData = await contentResponse.json();
+
+                        const pages = contentData.query.pages;
+                        const pageId = Object.keys(pages)[0];
+                        const extract = pages[pageId]?.extract || item.snippet;
+
+                        results.push({
+                            type: 'web',
+                            title: truncateText(item.title, 60),
+                            url: `https://en.wikipedia.org/wiki/${encodeURIComponent(item.title.replace(/ /g, '_'))}`,
+                            description: truncateText(item.snippet.replace(/<\/?[^>]+(>|$)/g, ""), 150),
+                            content: truncateText(extract, 300),
+                            domain: 'wikipedia.org',
+                            source: 'Wikipedia'
+                        });
+                    } catch (contentError) {}
+                }
+
+                return results;
+            } catch (error) {
+                return [];
+            }
+        }
+
+        async function searchReddit(query) {
+            try {
+                const response = await fetch(`https://www.reddit.com/search.json?q=${encodeURIComponent(query)}&limit=100&sort=relevance`);
+                const data = await response.json();
+
+                return (data.data?.children || []).map(post => ({
+                    type: 'forum',
+                    title: truncateText(post.data.title, 60),
+                    url: `https://reddit.com${post.data.permalink}`,
+                    description: truncateText(`r/${post.data.subreddit} • ${post.data.score} upvotes • ${post.data.num_comments} comments`, 150),
+                    content: truncateText(post.data.selftext || 'Discussion thread on Reddit', 300),
+                    domain: 'reddit.com',
+                    source: 'Reddit'
+                }));
+            } catch (error) {
+                return [];
+            }
+        }
+
+        async function searchHackerNews(query) {
+            try {
+                const response = await fetch(`https://hn.algolia.com/api/v1/search?query=${encodeURIComponent(query)}&tags=story&hitsPerPage=50`);
+                const data = await response.json();
+
+                return (data.hits || []).map(hit => ({
+                    type: 'forum',
+                    title: truncateText(hit.title, 60),
+                    url: hit.url || `https://news.ycombinator.com/item?id=${hit.objectID}`,
+                    description: truncateText(`${hit.points || 0} points • ${hit.num_comments || 0} comments • ${hit.author}`, 150),
+                    content: truncateText('Tech news and discussion on Hacker News', 300),
+                    domain: hit.url ? extractDomain(hit.url) : 'news.ycombinator.com',
+                    source: 'Hacker News'
+                }));
+            } catch (error) {
+                return [];
+            }
+        }
+
+        function truncateText(text, maxLength) {
+            if (!text) return '';
+            if (text.length <= maxLength) return text;
+            return text.substring(0, maxLength - 3) + '...';
+        }
+
+        function removeDuplicatesAndSort(results, query) {
+            const seen = new Set();
+            const unique = results.filter(result => {
+                const key = result.url + result.title;
+                if (seen.has(key)) return false;
+                seen.add(key);
+                return true;
+            });
+
+            return unique.sort((a, b) => {
+                const aRelevance = calculateRelevance(a, query);
+                const bRelevance = calculateRelevance(b, query);
+                return bRelevance - aRelevance;
+            });
+        }
+
+        function calculateRelevance(result, query) {
+            let score = 0;
+            const queryLower = query.toLowerCase();
+            const titleLower = result.title.toLowerCase();
+            const descLower = result.description.toLowerCase();
+
+            if (titleLower.includes(queryLower)) score += 100;
+            if (descLower.includes(queryLower)) score += 50;
+
+            if (result.type === 'domain') score += 1000;
+            if (result.type === 'weather') score += 200;
+            if (result.type === 'image') score += 150;
+            if (result.type === 'video') score += 140;
+            if (result.type === 'shopping') score += 130;
+            if (result.type === 'news') score += 120;
+            if (result.type === 'forum') score += 110;
+
+            const sourcePriority = {
+                'Direct Domain': 1000,
+                'Weather API': 200,
+                'Bing Images': 150,
+                'YouTube': 140,
+                'Google Shopping': 130,
+                'Google News': 120,
+                'Reddit': 110,
+                'Hacker News': 110,
+                'Bing': 90,
+                'Wikipedia': 80
+            };
+
+            score += sourcePriority[result.source] || 30;
+            return score;
+        }
+
+        function extractDomain(url) {
+            try {
+                return new URL(url).hostname;
+            } catch {
+                return url.split('/')[0] || 'unknown';
+            }
+        }
+
+        function displayResults(results, query) {
+            const resultsHeader = document.getElementById('resultsHeader');
+            const resultsContent = document.getElementById('resultsContent');
+            const sidebarContent = document.getElementById('sidebarContent');
+            const resultsCount = document.getElementById('resultsCount');
+            const searchTime = document.getElementById('searchTime');
+
+            allResults = results;
+            const searchDuration = ((Date.now() - searchStartTime) / 1000).toFixed(2);
+
+            resultsCount.textContent = `About ${results.length} results for "${query}"`;
+            searchTime.textContent = `(${searchDuration} seconds)`;
+
+            if (results.length === 0) {
+                resultsContent.innerHTML = `
+                    <div class="no-results">
+                        <h3>No results found</h3>
+                        <p>Try different keywords or check your spelling</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const startIndex = currentPage * RESULTS_PER_PAGE;
+            const endIndex = Math.min(startIndex + RESULTS_PER_PAGE, results.length);
+            let resultsHTML = '';
+
+            for (let i = startIndex; i < endIndex; i++) {
+                const result = results[i];
+                if (result.type === 'weather') {
+                    resultsHTML += createWeatherWidget(result);
+                } else if (result.type === 'image') {
+                    resultsHTML += createImageResult(result);
+                } else if (result.type === 'video') {
+                    resultsHTML += createVideoResult(result);
+                } else if (result.type === 'shopping') {
+                    resultsHTML += createShoppingResult(result);
+                } else if (result.type === 'news') {
+                    resultsHTML += createNewsResult(result);
+                } else if (result.type === 'forum') {
+                    resultsHTML += createForumResult(result);
+                } else {
+                    resultsHTML += createResultItem(result);
+                }
+            }
+
+            if (endIndex < results.length) {
+                resultsHTML += `
+                    <button class="load-more-btn" onclick="loadMoreResults()">
+                        <ion-icon name="add-outline" style="margin-right: 0.5rem;"></ion-icon>
+                        Load More Results
+                    </button>
+                `;
+            }
+
+            resultsContent.innerHTML = resultsHTML;
+            updateSidebar(results[0]);
+        }
+
+        function createWeatherWidget(result) {
+            const weather = result.weatherData;
+            return `
+                <div class="weather-widget" style="background: #fff; border: 1px solid #dfe1e5; border-radius: 8px; padding: 1.2rem; box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1);">
+                    <div class="weather-header">
+                        <ion-icon name="partly-sunny-outline" style="font-size: 2rem; color: #005b99;"></ion-icon>
+                        <div>
+                            <div style="font-size: 1.8rem; font-weight: 700; color: #202124;">${weather.temperature}°C</div>
+                            <div style="font-size: 0.85rem; margin-bottom: 0.2rem; color: #4d5156;">${weather.condition}</div>
+                            <div style="font-size: 0.9rem; color: #5f6368;">${weather.location}</div>
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 0.8rem; margin-top: 0.8rem;">
+                        <div style="text-align: center; padding: 0.6rem; background: #f8f9fa; border-radius: 6px;">
+                            <ion-icon name="water-outline" style="font-size: 1rem; color: #005b99;"></ion-icon>
+                            <div style="font-weight: 500; margin-top: 0.2rem;">Humidity</div>
+                            <div style="font-size: 0.9rem; font-weight: 600;">${weather.humidity}%</div>
+                        </div>
+                        <div style="text-align: center; padding: 0.6rem; background: #f8f9fa; border-radius: 6px;">
+                            <ion-icon name="speedometer-outline" style="font-size: 1rem; color: #005b99;"></ion-icon>
+                            <div style="font-weight: 500; margin-top: 0.2rem;">Wind</div>
+                            <div style="font-size: 0.9rem; font-weight: 600;">${weather.windSpeed} km/h</div>
+                        </div>
+                        <div style="text-align: center; padding: 0.6rem; background: #f8f9fa; border-radius: 6px;">
+                            <ion-icon name="eye-outline" style="font-size: 1rem; color: #005b99;"></ion-icon>
+                            <div style="font-weight: 500; margin-top: 0.2rem;">Visibility</div>
+                            <div style="font-size: 0.9rem; font-weight: 600;">${weather.visibility} km</div>
+                        </div>
+                        <div style="text-align: center; padding: 0.6rem; background: #f8f9fa; border-radius: 6px;">
+                            <ion-icon name="sunny-outline" style="font-size: 1rem; color: #005b99;"></ion-icon>
+                            <div style="font-weight: 500; margin-top: 0.2rem;">UV Index</div>
+                            <div style="font-size: 0.9rem; font-weight: 600;">${weather.uvIndex}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function createImageResult(result) {
+            return `
+                <div class="result-item" onclick="openResult('${result.url}')">
+                    <div class="result-header">
+                        <img class="result-favicon" src="https://www.google.com/s2/favicons?domain=${result.domain}&sz=16" alt="Favicon">
+                        <div class="result-source">${result.source}</div>
+                    </div>
+                    <img src="${result.imageUrl}" alt="${result.title}" class="result-image">
+                    <div class="result-title">${result.title}</div>
+                    <div class="result-url">${result.url}</div>
+                    <div class="result-description">${result.description}</div>
+                </div>
+            `;
+        }
+
+        function createVideoResult(result) {
+            return `
+                <div class="result-item" onclick="openResult('${result.url}')">
+                    <div class="result-header">
+                        <img class="result-favicon" src="https://www.google.com/s2/favicons?domain=${result.domain}&sz=16" alt="Favicon">
+                        <div class="result-source">${result.source}</div>
+                    </div>
+                    <div class="result-video">
+                        <iframe src="https://www.youtube.com/embed/${result.videoId}" frameborder="0" allowfullscreen></iframe>
+                    </div>
+                    <div class="result-title">${result.title}</div>
+                    <div class="result-url">${result.url}</div>
+                    <div class="result-description">${result.description}</div>
+                </div>
+            `;
+        }
+
+        function createShoppingResult(result) {
+            return `
+                <div class="result-item" onclick="openResult('${result.url}')">
+                    <div class="result-header">
+                        <img class="result-favicon" src="https://www.google.com/s2/favicons?domain=${result.domain}&sz=16" alt="Favicon">
+                        <div class="result-source">${result.source}</div>
+                    </div>
+                    <div class="result-shopping">
+                        ${result.imageUrl ? `<img src="${result.imageUrl}" alt="${result.title}">` : ''}
+                        <div>
+                            <div class="result-title">${result.title}</div>
+                            <div class="result-description">${result.description}</div>
+                        </div>
+                    </div>
+                    <div class="result-url">${result.url}</div>
+                </div>
+            `;
+        }
+
+        function createNewsResult(result) {
+            return `
+                <div class="result-item" onclick="openResult('${result.url}')">
+                    <div class="result-header">
+                        <img class="result-favicon" src="https://www.google.com/s2/favicons?domain=${result.domain}&sz=16" alt="Favicon">
+                        <div class="result-source">${result.source}</div>
+                    </div>
+                    <div class="result-title">${result.title}</div>
+                    <div class="result-url">${result.url}</div>
+                    <div class="result-description">${result.description}</div>
+                    <div class="result-news">${result.content}</div>
+                </div>
+            `;
+        }
+
+        function createForumResult(result) {
+            return `
+                <div class="result-item" onclick="openResult('${result.url}')">
+                    <div class="result-header">
+                        <img class="result-favicon" src="https://www.google.com/s2/favicons?domain=${result.domain}&sz=16" alt="Favicon">
+                        <div class="result-source">${result.source}</div>
+                    </div>
+                    <div class="result-title">${result.title}</div>
+                    <div class="result-url">${result.url}</div>
+                    <div class="result-description">${result.description}</div>
+                    <div class="result-forum">${result.content}</div>
+                </div>
+            `;
+        }
+
+        function createResultItem(result) {
+            const isDomain = result.type === 'domain' || result.isDomain;
+            const domainClass = isDomain ? 'domain-result' : '';
+            const domainBadge = isDomain ? '<div class="domain-badge">OFFICIAL SITE</div>' : `<div class="result-source">${result.source}</div>`;
+
+            return `
+                <div class="result-item ${domainClass}" onclick="openResult('${result.url}')">
+                    <div class="result-header">
+                        <img class="result-favicon" src="https://www.google.com/s2/favicons?domain=${result.domain}&sz=16" alt="Favicon" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiBmaWxsPSIjZWRlZGYxIiByeD0iNCIvPgo8L3N2Zz4K'">
+                        ${domainBadge}
+                    </div>
+                    <div class="result-title">${result.title}</div>
+                    <div class="result-url">${result.url}</div>
+                    <div class="result-description">${result.description}</div>
+                    ${result.content ? `<div class="result-content">${result.content}</div>` : ''}
+                </div>
+            `;
+        }
+
+        function updateSidebar(result) {
+            const sidebarContent = document.getElementById('sidebarContent');
+
+            if (!result) return;
+
+            sidebarContent.innerHTML = `
+                <div style="margin-bottom: 0.8rem;">
+                    <div style="font-weight: 500; font-size: 0.9rem; margin-bottom: 0.4rem; color: #202124;">${result.title}</div>
+                    <div style="color: #5f6368; font-size: 0.8rem; margin-bottom: 0.2rem;">Source: ${result.source}</div>
+                    <div style="color: #5f6368; font-size: 0.8rem;">Domain: ${result.domain}</div>
+                </div>
+                <div class="quick-info">
+                    ${result.description}
+                </div>
+            `;
+            sidebarLink = result.url;
+        }
+
+        function openSidebarLink() {
+            if (sidebarLink) {
+                window.location.href = sidebarLink;
+            }
+        }
+
+        function switchTab(type) {
+            currentTab = type;
+            currentPage = 0;
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.dataset.type === type) tab.classList.add('active');
+            });
+            if (currentQuery) performSearch();
+        }
+
+        function startVoiceSearch() {
+            if ('webkitSpeechRecognition' in window) {
+                const recognition = new webkitSpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.lang = 'en-US';
+
+                recognition.onstart = function() {
+                    document.querySelector('.action-btn ion-icon[name="mic-outline"]').setAttribute('name', 'mic');
+                };
+
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    document.getElementById('searchInput').value = transcript;
+                    performSearch();
+                };
+
+                recognition.onend = function() {
+                    document.querySelector('.action-btn ion-icon[name="mic"]')?.setAttribute('name', 'mic-outline');
+                };
+
+                recognition.start();
+            } else {
+                alert('Voice search is not supported in your browser');
+            }
+        }
+
+        function loadMoreResults() {
+            if (isLoadingMore) return;
+
+            isLoadingMore = true;
+            currentPage++;
+            displayResults(allResults, currentQuery);
+            isLoadingMore = false;
+        }
+
+        function displayError(message) {
+            const resultsContent = document.getElementById('resultsContent');
+            resultsContent.innerHTML = `
+                <div class="error-message">
+                    <ion-icon name="alert-circle-outline" style="font-size: 1.5rem; margin-bottom: 0.4rem;"></ion-icon>
+                    <div style="font-size: 0.9rem; font-weight: 500;">${message}</div>
+                </div>
+            `;
+        }
+
+        function openResult(url) {
+            window.location.href = url;
+        }
+    </script>
+</body>
+</html>
